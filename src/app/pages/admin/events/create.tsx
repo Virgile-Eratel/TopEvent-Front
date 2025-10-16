@@ -1,0 +1,1 @@
+export default function AdminEventCreatePage(){ return <div>Création event (formulaire)</div> }

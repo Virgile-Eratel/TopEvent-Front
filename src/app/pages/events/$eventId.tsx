@@ -1,0 +1,1 @@
+export default function EventDetailPage(){ return <div>Détail event (à implémenter)</div> }

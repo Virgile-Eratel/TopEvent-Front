@@ -3,11 +3,11 @@ Outil de gestion d'événements
 
 ## Technologies
 
-- React
-- Docker
+- React avec TypeScript
 - [Shadcn](https://ui.shadcn.com/)
-- Tailwind
-- TypeScript
-- Zod
-- React query
-- React router
+- [Tailwind](https://tailwindcss.com/)
+- [Zod](https://zod.dev/)
+- [Tanstack React query](https://tanstack.com/query/latest/docs/framework/react/overview)
+- [React router](https://reactrouter.com/)
+- [Vitest](https://vitest.dev/)
+- Docker
