@@ -163,7 +163,6 @@ export default function EventDetail() {
                         {event.createdBy && (
                             <div className="text-sm text-muted-foreground">
                                 <div>{event.createdBy.mail}</div>
-                                <div className="capitalize">{event.createdBy.role}</div>
                             </div>
                         )}
                     </div>
