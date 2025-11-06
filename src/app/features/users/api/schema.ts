@@ -13,4 +13,7 @@ export const UserSchema = z.object({
     subscriptions: z.array(z.lazy(() => SubscriptionSchema)).default([]),
 });
 
+export const UserSchemaSecure = UserSchema.omit({ password: true, subscriptions: true, role: true });
+export type UserSecure = z.infer<typeof UserSchemaSecure>;
+
 export type User = z.infer<typeof UserSchema>;

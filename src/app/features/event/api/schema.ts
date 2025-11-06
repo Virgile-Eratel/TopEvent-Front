@@ -1,5 +1,5 @@
 import { z } from "zod";
-import {UserSchema} from "../../users/api/schema.ts";
+import {UserSchemaSecure} from "../../users/api/schema.ts";
 import {SubscriptionSchema} from "../../subscriptions/api/schema.ts";
 
 export const EventTypeEnum = z.enum(["concert", "webinaire", "conference"]);
@@ -15,7 +15,7 @@ export const EventSchema = z.object({
     isPublic: z.boolean(),
     totalPlaces: z.number().int().nullable(),
     limitSubscriptionDate: z.coerce.date().nullable(),
-    createdBy: z.lazy(() => UserSchema),
+    createdBy: z.lazy(() => UserSchemaSecure),
     subscriptions: z.array(z.lazy(() => SubscriptionSchema)).default([]),
 });
 

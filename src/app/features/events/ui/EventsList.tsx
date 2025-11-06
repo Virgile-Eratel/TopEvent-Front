@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import "dayjs/locale/fr";
 import { useEventsList } from "@/app/features/events/api/queries";
@@ -14,6 +15,7 @@ dayjs.locale("fr");
 
 export default function EventsList() {
     const { data, isLoading, isError, error } = useEventsList();
+    const navigate = useNavigate();
 
     if (isLoading) {
         return (
@@ -66,7 +68,19 @@ export default function EventsList() {
                 </TableHeader>
                 <TableBody>
                     {sortedEvents.map((e) => (
-                        <TableRow key={String(e.id)}>
+                        <TableRow
+                            key={String(e.id)}
+                            role="link"
+                            tabIndex={0}
+                            className="cursor-pointer"
+                            onClick={() => navigate(`/events/${e.id}`)}
+                            onKeyDown={(evt) => {
+                                if (evt.key === "Enter" || evt.key === " ") {
+                                    evt.preventDefault();
+                                    navigate(`/events/${e.id}`);
+                                }
+                            }}
+                        >
                             <TableCell className="font-medium">{e.name}</TableCell>
                             <TableCell>
                                 {dayjs(e.startDate).format("DD/MM/YYYY HH:mm")}
