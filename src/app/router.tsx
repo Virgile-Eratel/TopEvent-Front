@@ -3,6 +3,7 @@ import RootLayout from './layouts/RootLayout'
 import EventsPage from './pages/events'
 import EventDetailPage from './pages/events/$eventId.tsx'
 import AdminEventCreatePage from './pages/admin/events/create.tsx'
+import AuthPage from './pages/auth'
 
 
 export const router = createBrowserRouter([
@@ -21,6 +22,10 @@ export const router = createBrowserRouter([
             {
                 path: 'admin/events',
                 children: [{ path: 'create', element: <AdminEventCreatePage /> }],
+            },
+            {
+                path: 'auth',
+                children: [{ index: true, element: <AuthPage /> }],
             },
         ],
     },
