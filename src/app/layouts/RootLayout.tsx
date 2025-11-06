@@ -12,15 +12,11 @@ import {
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarHeader,
-  SidebarInset,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
-  SidebarSeparator,
-  SidebarTrigger,
 } from "@/shared/components/ui/sidebar"
-import { Separator } from "@/shared/components/ui/separator"
 import { useAuth } from "@/app/features/auth/context/AuthContext"
 
 type NavigationItem = {
