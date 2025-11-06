@@ -47,8 +47,14 @@ export default function RootLayout() {
               label: "Créer un événement",
               to: "/admin/events/create",
               isActive: (pathname: string) =>
-                pathname.startsWith("/admin/events/create"),
-            } satisfies NavigationItem,
+                pathname === "/admin/events/create",
+            },
+            {
+              label: "Gestion de mes événements",
+              to: "/admin/events",
+              isActive: (pathname: string) =>
+                pathname === "/admin/events" || pathname === "/admin/events/",
+            } satisfies NavigationItem
           ]
         : []),
     ],

@@ -81,3 +81,14 @@ export async function httpPost<TBody, TResult>(path: string, body?: TBody, signa
 
     return parseResponse<TResult>(res);
 }
+
+export async function httpPut<TBody, TResult>(path: string, body?: TBody, signal?: AbortSignal): Promise<TResult> {
+    const res = await fetch(API_BASE_URL + path, {
+        method: "PUT",
+        signal,
+        headers: buildHeaders({ "Content-Type": "application/json" }),
+        body: body !== undefined ? JSON.stringify(body) : undefined,
+    });
+
+    return parseResponse<TResult>(res);
+}

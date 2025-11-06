@@ -10,6 +10,12 @@ async function fetchEventsList(signal?: AbortSignal): Promise<EventList> {
     return EventsArraySchema.parse(json)
 }
 
+async function fetchAdminEventsList(signal?: AbortSignal): Promise<EventList> {
+    const json = await httpGet<unknown>('/admins/events/all', signal)
+
+    return EventsArraySchema.parse(json)
+}
+
 async function fetchEventById(eventId: Event['id'], signal?: AbortSignal): Promise<Event> {
     const json = await httpGet<unknown>(`/event/${eventId}`, signal)
 
@@ -20,6 +26,13 @@ export function useEventsList() {
     return useQuery({
         queryKey: eventsKeys.list(),
         queryFn: ({ signal }) => fetchEventsList(signal),
+    })
+}
+
+export function useAdminEventsList() {
+    return useQuery({
+        queryKey: eventsKeys.adminList(),
+        queryFn: ({ signal }) => fetchAdminEventsList(signal),
     })
 }
 
