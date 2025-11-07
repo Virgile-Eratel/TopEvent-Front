@@ -99,7 +99,7 @@ export default function EventsList() {
                                     ? `${e.createdBy.firstName} ${e.createdBy.lastName}`
                                     : "-"}
                             </TableCell>
-                            <TableCell>{e.subscriptions?.length ?? 0}</TableCell>
+                            <TableCell>{e.currentSubscribers ?? 0}</TableCell>
                         </TableRow>
                     ))}
                 </TableBody>

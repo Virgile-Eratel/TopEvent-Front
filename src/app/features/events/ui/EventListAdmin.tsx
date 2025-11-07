@@ -181,7 +181,7 @@ export default function EventListAdmin() {
                                 </TableCell>
                                 <TableCell>{event.isPublic ? "Oui" : "Non"}</TableCell>
                                 <TableCell>{event.totalPlaces ?? "-"}</TableCell>
-                                <TableCell>{event.subscriptions?.length ?? 0}</TableCell>
+                                <TableCell>{event.currentSubscribers ?? 0}</TableCell>
                                 <TableCell className="text-right">
                                     <div className="flex items-center justify-end gap-2">
                                         <Button

@@ -4,6 +4,7 @@ import dayjs from "dayjs";
 import "dayjs/locale/fr";
 import EventDetail from "@/app/features/event/ui/EventDetail";
 import { useAdminSubscriptions } from "@/app/features/subscriptions/api/queries";
+import { useEvent } from "@/app/features/events/api/queries";
 import {
     Card,
     CardContent,
@@ -40,6 +41,7 @@ export default function AdminEventDetail() {
         isError: isSubscriptionsError,
         error: subscriptionsError,
     } = useAdminSubscriptions(isValidId ? eventId : null);
+    const { data: event } = useEvent(isValidId ? eventId : null);
 
     return (
         <>
@@ -70,7 +72,7 @@ export default function AdminEventDetail() {
                             ) : subscriptions && subscriptions.length > 0 ? (
                                 <Table>
                                     <TableCaption>
-                                        {subscriptions.length} inscription{subscriptions.length > 1 ? "s" : ""} au total
+                                        {event?.currentSubscribers ?? subscriptions.length} inscription{(event?.currentSubscribers ?? subscriptions.length) > 1 ? "s" : ""} au total
                                     </TableCaption>
                                     <TableHeader>
                                         <TableRow>

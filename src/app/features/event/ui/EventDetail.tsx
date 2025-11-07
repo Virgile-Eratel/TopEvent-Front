@@ -106,7 +106,7 @@ export default function EventDetail({ backLink = "/events", hideSubscriptionButt
     }
 
     const availablePlaces = event.totalPlaces 
-        ? event.totalPlaces - event.subscriptions.length 
+        ? event.totalPlaces - (event.currentSubscribers ?? 0)
         : null;
     const hasAvailablePlaces = availablePlaces === null || availablePlaces > 0;
     
