@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { httpPost, httpPut } from "@/shared/lib/http";
+import { httpDelete, httpPost, httpPut } from "@/shared/lib/http";
 
 import { eventsKeys } from "@/app/features/events/api/keys";
 
@@ -52,6 +52,22 @@ export function useUpdateEventMutation() {
             queryClient.invalidateQueries({ queryKey: eventsKeys.list() });
             queryClient.invalidateQueries({ queryKey: eventsKeys.adminList() });
             queryClient.invalidateQueries({ queryKey: eventsKeys.detail(updatedEvent.id) });
+        },
+    });
+}
+
+async function deleteEventRequest(eventId: Event["id"]): Promise<void> {
+    await httpDelete<unknown>(`/admin/event/${eventId}`);
+}
+
+export function useDeleteEventMutation() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: deleteEventRequest,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: eventsKeys.list() });
+            queryClient.invalidateQueries({ queryKey: eventsKeys.adminList() });
         },
     });
 }

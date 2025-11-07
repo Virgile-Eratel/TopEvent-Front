@@ -92,3 +92,13 @@ export async function httpPut<TBody, TResult>(path: string, body?: TBody, signal
 
     return parseResponse<TResult>(res);
 }
+
+export async function httpDelete<TResult>(path: string, signal?: AbortSignal): Promise<TResult> {
+    const res = await fetch(API_BASE_URL + path, {
+        method: "DELETE",
+        signal,
+        headers: buildHeaders(),
+    });
+
+    return parseResponse<TResult>(res);
+}
