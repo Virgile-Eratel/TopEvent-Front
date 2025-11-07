@@ -1,7 +1,7 @@
 import { Link, useParams } from "react-router-dom";
 import dayjs from "dayjs";
 import "dayjs/locale/fr";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useEvent } from "@/app/features/events/api/queries";
 import { Badge } from "@/shared/components/ui/badge";
 import {
@@ -14,7 +14,8 @@ import {
 } from "@/shared/components/ui/card";
 import { Button } from "@/shared/components/ui/button";
 import { useAuth } from "@/app/features/auth/context/AuthContext";
-import { useCreateSubscriptionMutation } from "@/app/features/subscriptions/api/queries";
+import { useCreateSubscriptionMutation, useUserSubscription } from "@/app/features/subscriptions/api/queries";
+import { CancelSubscriptionDialog } from "@/app/features/subscriptions/ui/CancelSubscriptionDialog";
 import { toast } from "react-hot-toast";
 
 dayjs.locale("fr");
@@ -27,8 +28,9 @@ type EventDetailProps = {
 export default function EventDetail({ backLink = "/events", hideSubscriptionButton = false }: EventDetailProps) {
     const params = useParams<{ eventId: string }>();
     const eventIdParam = params.eventId;
-    const { user, isAuthenticated } = useAuth();
+    const { isAuthenticated } = useAuth();
     const { mutateAsync: createSubscription, isPending: isSubscribing } = useCreateSubscriptionMutation();
+    const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
     
     const eventId = useMemo(() => {
         if (!eventIdParam) return null;
@@ -43,7 +45,14 @@ export default function EventDetail({ backLink = "/events", hideSubscriptionButt
         isError,
         error,
     } = useEvent(isValidId ? eventId : 0);
-
+    
+    const userSubscriptionEventId = useMemo(() => {
+        return isAuthenticated && isValidId && eventId !== null ? eventId : null;
+    }, [isAuthenticated, isValidId, eventId]);
+    
+    const userSubscriptionQuery = useUserSubscription(userSubscriptionEventId);
+    const { data: userSubscription } = userSubscriptionQuery;
+    
     if (!eventIdParam || !isValidId) {
         return (
             <div className="mx-auto flex max-w-3xl flex-1 flex-col gap-4 p-6">
@@ -110,10 +119,6 @@ export default function EventDetail({ backLink = "/events", hideSubscriptionButt
         : null;
     const hasAvailablePlaces = availablePlaces === null || availablePlaces > 0;
     
-    const isUserSubscribed = user && event.subscriptions.some(
-        (sub) => sub.userId === user.id
-    );
-    
     const isSubscriptionClosed = event.limitSubscriptionDate 
         ? dayjs().isAfter(dayjs(event.limitSubscriptionDate))
         : false;
@@ -130,6 +135,10 @@ export default function EventDetail({ backLink = "/events", hideSubscriptionButt
                 : "Une erreur est survenue lors de l'inscription.";
             toast.error(message);
         }
+    };
+
+    const handleCancelSuccess = () => {
+        // La query sera automatiquement invalidée par la mutation
     };
 
     const duration = `${dayjs(event.startDate).format("DD MMMM YYYY HH:mm")} → ${dayjs(event.endDate).format("DD MMMM YYYY HH:mm")}`;
@@ -206,10 +215,19 @@ export default function EventDetail({ backLink = "/events", hideSubscriptionButt
                                     <Button asChild variant="outline">
                                         <Link to="/auth">Connectez-vous pour vous inscrire</Link>
                                     </Button>
-                                ) : isUserSubscribed ? (
-                                    <Badge variant="secondary" className="px-4 py-2">
-                                        Vous êtes déjà inscrit
-                                    </Badge>
+                                ) : userSubscription ? (
+                                    <div className="flex w-full flex-col items-center gap-4">
+                                        <Badge variant="secondary" className="px-4 py-2">
+                                            Vous êtes inscrit à cet événement
+                                        </Badge>
+                                        <Button 
+                                            variant="destructive"
+                                            onClick={() => setIsCancelDialogOpen(true)}
+                                            className="w-full md:w-auto"
+                                        >
+                                            Se désinscrire
+                                        </Button>
+                                    </div>
                                 ) : isSubscriptionClosed ? (
                                     <Badge variant="outline" className="px-4 py-2">
                                         Inscriptions closes
@@ -232,6 +250,40 @@ export default function EventDetail({ backLink = "/events", hideSubscriptionButt
                     </CardFooter>
                 )}
             </Card>
+            
+            {userSubscription && (
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Mon inscription</CardTitle>
+                        <CardDescription>
+                            Détails de votre inscription à cet événement
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <dl className="space-y-2 text-sm">
+                            <div className="flex justify-between gap-4 border-b border-border/40 pb-2">
+                                <dt className="text-muted-foreground">Date d&apos;inscription</dt>
+                                <dd className="text-right font-medium">
+                                    {dayjs(userSubscription.subscriptionDate).format("DD MMMM YYYY HH:mm")}
+                                </dd>
+                            </div>
+                            <div className="flex justify-between gap-4">
+                                <dt className="text-muted-foreground">Statut</dt>
+                                <dd className="text-right font-medium">
+                                    <Badge variant="secondary">Inscrit</Badge>
+                                </dd>
+                            </div>
+                        </dl>
+                    </CardContent>
+                </Card>
+            )}
+            
+            <CancelSubscriptionDialog
+                subscription={userSubscription ?? null}
+                open={isCancelDialogOpen}
+                onOpenChange={setIsCancelDialogOpen}
+                onSuccess={handleCancelSuccess}
+            />
         </div>
     );
 }
