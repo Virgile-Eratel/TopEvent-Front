@@ -5,6 +5,7 @@ import EventDetailPage from './pages/events/$eventId.tsx'
 import AdminEventCreatePage from './pages/admin/events/create.tsx'
 import AuthPage from './pages/auth'
 import AdminEventsPage from './pages/admin/events/listEvents.tsx'
+import { ProtectedAdminRoute } from './components/ProtectedAdminRoute'
 
 
 export const router = createBrowserRouter([
@@ -21,10 +22,16 @@ export const router = createBrowserRouter([
                 ],
             },
             {
-                path: 'admin/events',
+                path: 'admin',
+                element: <ProtectedAdminRoute />,
                 children: [
-                    { path: 'create', element: <AdminEventCreatePage /> },
-                    { index: true, element: <AdminEventsPage /> },
+                    {
+                        path: 'events',
+                        children: [
+                            { path: 'create', element: <AdminEventCreatePage /> },
+                            { index: true, element: <AdminEventsPage /> },
+                        ],
+                    },
                 ],
             },
             {
