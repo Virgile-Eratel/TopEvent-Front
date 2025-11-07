@@ -28,6 +28,7 @@ export function useCreateSubscriptionMutation() {
             queryClient.invalidateQueries({ queryKey: eventsKeys.detail(subscription.eventId) });
             queryClient.invalidateQueries({ queryKey: eventsKeys.list() });
             queryClient.invalidateQueries({ queryKey: ["subscriptions", "user", subscription.eventId] });
+            queryClient.invalidateQueries({ queryKey: ["subscriptions", "user"] });
             queryClient.invalidateQueries({ queryKey: eventsKeys.all });
         },
     });
@@ -89,8 +90,29 @@ export function useCancelSubscriptionMutation() {
         mutationFn: cancelSubscriptionRequest,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["subscriptions"] });
+            queryClient.invalidateQueries({ queryKey: ["subscriptions", "user"] });
             queryClient.invalidateQueries({ queryKey: eventsKeys.list() });
             queryClient.invalidateQueries({ queryKey: eventsKeys.all });
+        },
+    });
+}
+
+async function fetchUserSubscriptions(signal?: AbortSignal): Promise<Subscription[]> {
+    const json = await httpGet<unknown>("/user/subscriptions", signal);
+    return z.array(SubscriptionSchema).parse(json);
+}
+
+export function useUserSubscriptions() {
+    const { user } = useAuth();
+    
+    return useQuery({
+        enabled: user !== null,
+        queryKey: ["subscriptions", "user"],
+        queryFn: ({ signal }) => {
+            if (!user) {
+                throw new Error("Utilisateur non authentifié");
+            }
+            return fetchUserSubscriptions(signal);
         },
     });
 }

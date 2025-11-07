@@ -7,6 +7,7 @@ import AdminEventDetailPage from './pages/admin/events/$eventId.tsx'
 import AuthPage from './pages/auth'
 import AdminEventsPage from './pages/admin/events/listEvents.tsx'
 import { ProtectedAdminRoute } from './components/ProtectedAdminRoute'
+import SubscriptionsListPage from './pages/subscriptions/index.tsx'
 
 
 export const router = createBrowserRouter([
@@ -20,6 +21,12 @@ export const router = createBrowserRouter([
                 children: [
                     { index: true, element: <EventsPage /> },
                     { path: ':eventId', element: <EventDetailPage /> },
+                ],
+            },
+            {
+                path: 'subscriptions',
+                children: [
+                    { index: true, element: <SubscriptionsListPage /> },
                 ],
             },
             {

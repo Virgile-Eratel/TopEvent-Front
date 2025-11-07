@@ -41,6 +41,11 @@ export default function RootLayout() {
         to: "/events",
         isActive: (pathname) => pathname.startsWith("/events"),
       },
+      {
+        label: "Inscriptions",
+        to: "/subscriptions",
+        isActive: (pathname) => pathname.startsWith("/subscriptions"),
+      },
       ...(user?.role === "admin"
         ? [
             {
