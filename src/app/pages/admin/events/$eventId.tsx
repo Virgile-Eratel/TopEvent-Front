@@ -72,7 +72,7 @@ export default function AdminEventDetail() {
                             ) : subscriptions && subscriptions.length > 0 ? (
                                 <Table>
                                     <TableCaption>
-                                        {event?.currentSubscribers ?? subscriptions.length} inscription{(event?.currentSubscribers ?? subscriptions.length) > 1 ? "s" : ""} au total
+                                        {(subscriptions?.length ?? event?.currentSubscribers ?? 0)} inscription{(subscriptions?.length ?? event?.currentSubscribers ?? 0) > 1 ? "s" : ""} au total
                                     </TableCaption>
                                     <TableHeader>
                                         <TableRow>
