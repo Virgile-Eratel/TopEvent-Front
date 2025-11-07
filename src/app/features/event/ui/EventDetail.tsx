@@ -13,21 +13,23 @@ import {
     CardTitle,
 } from "@/shared/components/ui/card";
 import { Button } from "@/shared/components/ui/button";
-import {
-    Table,
-    TableBody,
-    TableCaption,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/shared/components/ui/table";
+import { useAuth } from "@/app/features/auth/context/AuthContext";
+import { useCreateSubscriptionMutation } from "@/app/features/subscriptions/api/queries";
+import { toast } from "react-hot-toast";
 
 dayjs.locale("fr");
 
-export default function EventDetail() {
+type EventDetailProps = {
+    backLink?: string;
+    hideSubscriptionButton?: boolean;
+};
+
+export default function EventDetail({ backLink = "/events", hideSubscriptionButton = false }: EventDetailProps) {
     const params = useParams<{ eventId: string }>();
     const eventIdParam = params.eventId;
+    const { user, isAuthenticated } = useAuth();
+    const { mutateAsync: createSubscription, isPending: isSubscribing } = useCreateSubscriptionMutation();
+    
     const eventId = useMemo(() => {
         if (!eventIdParam) return null;
         const numeric = Number(eventIdParam);
@@ -49,7 +51,7 @@ export default function EventDetail() {
                     Identifiant d&apos;événement invalide.
                 </div>
                 <Button asChild variant="ghost" className="w-fit">
-                    <Link to="/events">&larr; Retour à la liste</Link>
+                    <Link to={backLink}>&larr; Retour à la liste</Link>
                 </Button>
             </div>
         );
@@ -75,7 +77,7 @@ export default function EventDetail() {
                     </CardHeader>
                     <CardFooter>
                         <Button asChild variant="ghost">
-                            <Link to="/events">&larr; Retour à la liste</Link>
+                            <Link to={backLink}>&larr; Retour à la liste</Link>
                         </Button>
                     </CardFooter>
                 </Card>
@@ -95,13 +97,40 @@ export default function EventDetail() {
                     </CardHeader>
                     <CardFooter>
                         <Button asChild variant="ghost">
-                            <Link to="/events">&larr; Retour à la liste</Link>
+                            <Link to={backLink}>&larr; Retour à la liste</Link>
                         </Button>
                     </CardFooter>
                 </Card>
             </div>
         );
     }
+
+    const availablePlaces = event.totalPlaces 
+        ? event.totalPlaces - event.subscriptions.length 
+        : null;
+    const hasAvailablePlaces = availablePlaces === null || availablePlaces > 0;
+    
+    const isUserSubscribed = user && event.subscriptions.some(
+        (sub) => sub.userId === user.id
+    );
+    
+    const isSubscriptionClosed = event.limitSubscriptionDate 
+        ? dayjs().isAfter(dayjs(event.limitSubscriptionDate))
+        : false;
+
+    const handleSubscribe = async () => {
+        if (!eventId) return;
+        
+        try {
+            await createSubscription({ eventId });
+            toast.success("Inscription réussie !");
+        } catch (error) {
+            const message = error instanceof Error 
+                ? error.message 
+                : "Une erreur est survenue lors de l'inscription.";
+            toast.error(message);
+        }
+    };
 
     const duration = `${dayjs(event.startDate).format("DD MMMM YYYY HH:mm")} → ${dayjs(event.endDate).format("DD MMMM YYYY HH:mm")}`;
     const limitDate = event.limitSubscriptionDate
@@ -111,7 +140,7 @@ export default function EventDetail() {
     return (
         <div className="mx-auto flex max-w-4xl flex-1 flex-col gap-6 p-6">
             <Button asChild variant="ghost" className="w-fit">
-                <Link to="/events">&larr; Retour à la liste</Link>
+                <Link to={backLink}>&larr; Retour à la liste</Link>
             </Button>
 
             <Card>
@@ -148,7 +177,9 @@ export default function EventDetail() {
                         <div className="flex justify-between gap-4">
                             <dt className="text-muted-foreground">Places disponibles</dt>
                             <dd className="text-right font-medium">
-                                {event.totalPlaces ?? "Illimité"}
+                                {availablePlaces !== null 
+                                    ? `${availablePlaces} / ${event.totalPlaces}` 
+                                    : "Illimité"}
                             </dd>
                         </div>
                     </dl>
@@ -167,48 +198,39 @@ export default function EventDetail() {
                         )}
                     </div>
                 </CardContent>
-                <CardFooter className="flex-col items-stretch gap-4">
-                    <div className="flex items-center justify-between text-sm text-muted-foreground">
-                        <span>Inscriptions ({event.subscriptions.length})</span>
-                        {event.limitSubscriptionDate && (
-                            <span>
-                                Dernière mise à jour le {dayjs().format("DD/MM/YYYY à HH:mm")}
-                            </span>
+                {!hideSubscriptionButton && (
+                    <CardFooter className="flex-col items-stretch gap-4">
+                        {event.isPublic && (
+                            <div className="flex items-center justify-center">
+                                {!isAuthenticated ? (
+                                    <Button asChild variant="outline">
+                                        <Link to="/auth">Connectez-vous pour vous inscrire</Link>
+                                    </Button>
+                                ) : isUserSubscribed ? (
+                                    <Badge variant="secondary" className="px-4 py-2">
+                                        Vous êtes déjà inscrit
+                                    </Badge>
+                                ) : isSubscriptionClosed ? (
+                                    <Badge variant="outline" className="px-4 py-2">
+                                        Inscriptions closes
+                                    </Badge>
+                                ) : !hasAvailablePlaces ? (
+                                    <Badge variant="outline" className="px-4 py-2">
+                                        Plus de places disponibles
+                                    </Badge>
+                                ) : (
+                                    <Button 
+                                        onClick={handleSubscribe} 
+                                        disabled={isSubscribing}
+                                        className="w-full md:w-auto"
+                                    >
+                                        {isSubscribing ? "Inscription..." : "S'inscrire"}
+                                    </Button>
+                                )}
+                            </div>
                         )}
-                    </div>
-
-                    {event.subscriptions.length > 0 ? (
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>#</TableHead>
-                                    <TableHead>Utilisateur</TableHead>
-                                    <TableHead>Date</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {event.subscriptions.map((subscription) => (
-                                    <TableRow key={subscription.id}>
-                                        <TableCell>{subscription.id}</TableCell>
-                                        <TableCell>{subscription.userID}</TableCell>
-                                        <TableCell>
-                                            {dayjs(subscription.subscriptionDate).format(
-                                                "DD/MM/YYYY HH:mm"
-                                            )}
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                            <TableCaption>
-                                {event.subscriptions.length} inscription(s) enregistrée(s)
-                            </TableCaption>
-                        </Table>
-                    ) : (
-                        <div className="rounded-md border border-dashed border-border/50 bg-muted/40 p-4 text-sm text-muted-foreground">
-                            Aucune inscription pour le moment.
-                        </div>
-                    )}
-                </CardFooter>
+                    </CardFooter>
+                )}
             </Card>
         </div>
     );

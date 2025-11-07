@@ -146,11 +146,11 @@ export default function EventListAdmin() {
                                 role="link"
                                 tabIndex={0}
                                 className="cursor-pointer"
-                                onClick={() => navigate(`/events/${event.id}`)}
+                                onClick={() => navigate(`/admin/events/${event.id}`)}
                                 onKeyDown={(evt) => {
                                     if (evt.key === "Enter" || evt.key === " ") {
                                         evt.preventDefault();
-                                        navigate(`/events/${event.id}`);
+                                        navigate(`/admin/events/${event.id}`);
                                     }
                                 }}
                             >
