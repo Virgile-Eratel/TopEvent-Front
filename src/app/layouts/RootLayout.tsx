@@ -33,8 +33,8 @@ export default function RootLayout() {
     () => [
       {
         label: "Accueil",
-        to: "/",
-        isActive: (pathname) => pathname === "/",
+        to: "/home",
+        isActive: (pathname) => pathname === "/home",
       },
       {
         label: "Événements",

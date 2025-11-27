@@ -4,6 +4,12 @@ import { EventSchema, type Event } from '../../event/api/schema'
 import { eventsKeys } from './keys'
 import { EventsArraySchema, type EventList } from './schema'
 
+async function fetchEventsTop(signal?: AbortSignal): Promise<EventList> {
+    const json = await httpGet<unknown>('/events/top', signal)
+
+    return EventsArraySchema.parse(json)
+}
+
 async function fetchEventsList(signal?: AbortSignal): Promise<EventList> {
     const json = await httpGet<unknown>('/events/all', signal)
 
@@ -26,6 +32,13 @@ export function useEventsList() {
     return useQuery({
         queryKey: eventsKeys.list(),
         queryFn: ({ signal }) => fetchEventsList(signal),
+    })
+}
+
+export function useEventsTop() {
+    return useQuery({
+        queryKey: eventsKeys.list(),
+        queryFn: ({ signal }) => fetchEventsTop(signal),
     })
 }
 
