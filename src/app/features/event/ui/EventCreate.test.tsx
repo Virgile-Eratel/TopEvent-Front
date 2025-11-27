@@ -3,7 +3,6 @@ import userEvent from '@testing-library/user-event'
 import { vi, describe, it, expect, beforeEach } from 'vitest'
 import EventCreate from './EventCreate'
 import { renderWithProviders } from '@/test/test-utils'
-import * as queries from '../api/queries'
 
 // Mock the mutation hook
 const mockCreateEvent = vi.fn()
@@ -21,7 +20,7 @@ vi.mock('../api/queries', () => ({
         options: ['concert', 'conference', 'workshop']
     },
     EventCreateSchema: {
-        parse: (v: any) => v // Mock simple pass-through or use real schema if possible
+        parse: (v: unknown) => v // Mock simple pass-through or use real schema if possible
     }
 }))
 

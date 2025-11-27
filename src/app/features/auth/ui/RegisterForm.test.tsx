@@ -3,7 +3,6 @@ import userEvent from '@testing-library/user-event'
 import { vi, describe, it, expect, beforeEach } from 'vitest'
 import { RegisterForm } from './RegisterForm'
 import { renderWithProviders } from '@/test/test-utils'
-import { z } from 'zod'
 
 const mockRegister = vi.fn()
 const mockAuthenticate = vi.fn()
