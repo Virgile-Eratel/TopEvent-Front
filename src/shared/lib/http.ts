@@ -92,3 +92,24 @@ export async function httpPut<TBody, TResult>(path: string, body?: TBody, signal
 
     return parseResponse<TResult>(res);
 }
+
+export async function httpPatch<TBody, TResult>(path: string, body?: TBody, signal?: AbortSignal): Promise<TResult> {
+    const res = await fetch(API_BASE_URL + path, {
+        method: "PATCH",
+        signal,
+        headers: buildHeaders({ "Content-Type": "application/json" }),
+        body: body !== undefined ? JSON.stringify(body) : undefined,
+    });
+
+    return parseResponse<TResult>(res);
+}
+
+export async function httpDelete<TResult>(path: string, signal?: AbortSignal): Promise<TResult> {
+    const res = await fetch(API_BASE_URL + path, {
+        method: "DELETE",
+        signal,
+        headers: buildHeaders(),
+    });
+
+    return parseResponse<TResult>(res);
+}

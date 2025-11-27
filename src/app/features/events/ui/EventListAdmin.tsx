@@ -42,6 +42,8 @@ import {
 } from "@/shared/components/ui/table";
 import { cn } from "@/shared/lib/utils";
 
+import { DeleteEventDialog } from "./DeleteEventDialog";
+
 dayjs.locale("fr");
 
 const selectClasses =
@@ -57,6 +59,8 @@ export default function EventListAdmin() {
     const { data, isLoading, isError, error } = useAdminEventsList();
     const [isSheetOpen, setIsSheetOpen] = useState(false);
     const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+    const [eventToDelete, setEventToDelete] = useState<Event | null>(null);
 
     const sortedEvents = useMemo(() => {
         return [...(data ?? [])].sort(
@@ -79,6 +83,16 @@ export default function EventListAdmin() {
     const handleEditSuccess = () => {
         setIsSheetOpen(false);
         setSelectedEvent(null);
+    };
+
+    const openDeleteDialog = (event: Event) => {
+        setEventToDelete(event);
+        setIsDeleteDialogOpen(true);
+    };
+
+    const handleDeleteSuccess = () => {
+        setIsDeleteDialogOpen(false);
+        setEventToDelete(null);
     };
 
     if (isLoading) {
@@ -146,11 +160,11 @@ export default function EventListAdmin() {
                                 role="link"
                                 tabIndex={0}
                                 className="cursor-pointer"
-                                onClick={() => navigate(`/events/${event.id}`)}
+                                onClick={() => navigate(`/admin/events/${event.id}`)}
                                 onKeyDown={(evt) => {
                                     if (evt.key === "Enter" || evt.key === " ") {
                                         evt.preventDefault();
-                                        navigate(`/events/${event.id}`);
+                                        navigate(`/admin/events/${event.id}`);
                                     }
                                 }}
                             >
@@ -167,18 +181,30 @@ export default function EventListAdmin() {
                                 </TableCell>
                                 <TableCell>{event.isPublic ? "Oui" : "Non"}</TableCell>
                                 <TableCell>{event.totalPlaces ?? "-"}</TableCell>
-                                <TableCell>{event.subscriptions?.length ?? 0}</TableCell>
+                                <TableCell>{event.currentSubscribers ?? 0}</TableCell>
                                 <TableCell className="text-right">
-                                    <Button
-                                        size="sm"
-                                        variant="secondary"
-                                        onClick={(evt) => {
-                                            evt.stopPropagation();
-                                            openEditSheet(event);
-                                        }}
-                                    >
-                                        Modifier
-                                    </Button>
+                                    <div className="flex items-center justify-end gap-2">
+                                        <Button
+                                            size="sm"
+                                            variant="secondary"
+                                            onClick={(evt) => {
+                                                evt.stopPropagation();
+                                                openEditSheet(event);
+                                            }}
+                                        >
+                                            Modifier
+                                        </Button>
+                                        <Button
+                                            size="sm"
+                                            variant="destructive"
+                                            onClick={(evt) => {
+                                                evt.stopPropagation();
+                                                openDeleteDialog(event);
+                                            }}
+                                        >
+                                            Supprimer
+                                        </Button>
+                                    </div>
                                 </TableCell>
                             </TableRow>
                         ))
@@ -197,6 +223,13 @@ export default function EventListAdmin() {
                     )}
                 </SheetContent>
             </Sheet>
+
+            <DeleteEventDialog
+                event={eventToDelete}
+                open={isDeleteDialogOpen}
+                onOpenChange={setIsDeleteDialogOpen}
+                onSuccess={handleDeleteSuccess}
+            />
         </div>
     );
 }

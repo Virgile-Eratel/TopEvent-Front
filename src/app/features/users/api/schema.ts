@@ -17,3 +17,11 @@ export const UserSchemaSecure = UserSchema.omit({ password: true, subscriptions:
 export type UserSecure = z.infer<typeof UserSchemaSecure>;
 
 export type User = z.infer<typeof UserSchema>;
+
+export const UserUpdateSchema = z.object({
+    firstName: z.string().min(1, { message: "Prénom requis" }),
+    lastName: z.string().min(1, { message: "Nom requis" }),
+    mail: z.string().email({ message: "Email invalide" }),
+});
+
+export type UserUpdateInput = z.infer<typeof UserUpdateSchema>;

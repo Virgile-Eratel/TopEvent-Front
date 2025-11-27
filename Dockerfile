@@ -14,6 +14,8 @@ EXPOSE 5173
 CMD ["yarn","dev","--host","0.0.0.0","--port","5173"]
 
 FROM base AS build
+ARG VITE_API_URL
+ENV VITE_API_URL=$VITE_API_URL
 ENV NODE_ENV=production
 COPY --from=deps /app/node_modules /app/node_modules
 COPY . .

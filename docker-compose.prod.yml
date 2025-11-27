@@ -1,0 +1,7 @@
+services:
+  web:
+    image: ghcr.io/virgile-eratel/topevent-front:latest
+    ports:
+      - "3002:80"
+    restart: always
+

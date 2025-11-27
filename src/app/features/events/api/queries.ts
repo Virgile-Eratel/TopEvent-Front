@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { httpGet } from '@/shared/lib/http'
 import { EventSchema, type Event } from '../../event/api/schema'
 import { eventsKeys } from './keys'
@@ -10,8 +10,21 @@ async function fetchEventsTop(signal?: AbortSignal): Promise<EventList> {
     return EventsArraySchema.parse(json)
 }
 
-async function fetchEventsList(signal?: AbortSignal): Promise<EventList> {
-    const json = await httpGet<unknown>('/events/all', signal)
+export type EventFilters = {
+    category?: string
+    date?: string
+    location?: string
+    search?: string
+}
+
+async function fetchEventsList(filters?: EventFilters, signal?: AbortSignal): Promise<EventList> {
+    const searchParams = new URLSearchParams()
+    if (filters?.category) searchParams.set('category', filters.category)
+    if (filters?.date) searchParams.set('date', filters.date)
+    if (filters?.location) searchParams.set('location', filters.location)
+    if (filters?.search) searchParams.set('search', filters.search)
+
+    const json = await httpGet<unknown>(`/events/all?${searchParams.toString()}`, signal)
 
     return EventsArraySchema.parse(json)
 }
@@ -28,10 +41,11 @@ async function fetchEventById(eventId: Event['id'], signal?: AbortSignal): Promi
     return EventSchema.parse(json)
 }
 
-export function useEventsList() {
+export function useEventsList(filters?: EventFilters) {
     return useQuery({
-        queryKey: eventsKeys.list(),
-        queryFn: ({ signal }) => fetchEventsList(signal),
+        queryKey: [...eventsKeys.list(), filters],
+        queryFn: ({ signal }) => fetchEventsList(filters, signal),
+        placeholderData: keepPreviousData,
     })
 }
 

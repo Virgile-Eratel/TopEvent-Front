@@ -54,6 +54,7 @@ type AuthContextValue = {
   isAuthenticated: boolean
   login: (auth: AuthResponse) => void
   logout: () => void
+  updateUser: (user: AuthUser) => void
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
@@ -74,6 +75,11 @@ export function AuthProvider({ children }: PropsWithChildren) {
     writeStoredUser(null)
     setToken(null)
     setUser(null)
+  }, [])
+
+  const updateUser = useCallback((newUser: AuthUser) => {
+      writeStoredUser(newUser)
+      setUser(newUser)
   }, [])
 
   useEffect(() => {
@@ -98,8 +104,9 @@ export function AuthProvider({ children }: PropsWithChildren) {
       isAuthenticated: Boolean(user && token),
       login,
       logout,
+      updateUser,
     }),
-    [login, logout, token, user]
+    [login, logout, updateUser, token, user]
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

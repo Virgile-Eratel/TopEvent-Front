@@ -18,6 +18,7 @@ export const EventSchema = z.object({
     limitSubscriptionDate: z.coerce.date().nullable(),
     createdBy: z.lazy(() => UserSchemaSecure).nullish(),
     subscriptions: z.array(z.lazy(() => SubscriptionSchema)).default([]),
+    currentSubscribers: z.number().int().nullish(),
 });
 
 export type Event = z.infer<typeof EventSchema>;
