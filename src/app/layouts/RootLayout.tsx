@@ -1,6 +1,7 @@
 import { Outlet, useLocation, Link } from "react-router-dom"
-import { useEffect, useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { toast } from "react-hot-toast"
+import { Settings } from "lucide-react"
 
 import { consumeQueuedToast } from "@/shared/lib/toast"
 import { Button } from "@/shared/components/ui/button"
@@ -18,6 +19,7 @@ import {
   SidebarProvider,
 } from "@/shared/components/ui/sidebar"
 import { useAuth } from "@/app/features/auth/context/AuthContext"
+import { UserUpdateDialog } from "@/app/features/users/ui/UserUpdateDialog"
 
 type NavigationItem = {
   label: string
@@ -28,6 +30,7 @@ type NavigationItem = {
 export default function RootLayout() {
   const location = useLocation()
   const { user, isAuthenticated, logout } = useAuth()
+  const [isProfileOpen, setIsProfileOpen] = useState(false)
 
   const navigation = useMemo<NavigationItem[]>(
     () => [
@@ -118,14 +121,26 @@ export default function RootLayout() {
           <SidebarFooter>
             {isAuthenticated && user ? (
               <div className="rounded-md border border-sidebar-border bg-sidebar/40 p-3 text-sm">
-                <div className="space-y-0.5">
-                  <p className="font-semibold capitalize">
-                    {user.firstName} {user.lastName}
-                  </p>
-                  <p className="text-xs text-sidebar-foreground/70">{user.mail}</p>
-                  <p className="text-xs text-sidebar-foreground/70">
-                    Rôle : {user.role === "admin" ? "Organisateur" : "Utilisateur"}
-                  </p>
+                <div className="flex items-start justify-between gap-2">
+                  <div className="space-y-0.5 overflow-hidden">
+                    <p className="truncate font-semibold capitalize">
+                      {user.firstName} {user.lastName}
+                    </p>
+                    <p className="truncate text-xs text-sidebar-foreground/70">
+                      {user.mail}
+                    </p>
+                    <p className="text-xs text-sidebar-foreground/70">
+                      Rôle : {user.role === "admin" ? "Organisateur" : "Utilisateur"}
+                    </p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 shrink-0"
+                    onClick={() => setIsProfileOpen(true)}
+                  >
+                    <Settings className="h-4 w-4" />
+                  </Button>
                 </div>
                 <Button
                   variant="outline"
@@ -145,7 +160,8 @@ export default function RootLayout() {
         </Sidebar>
         <main className="flex-1">
           <Outlet />
-        </main> 
+        </main>
+        <UserUpdateDialog open={isProfileOpen} onOpenChange={setIsProfileOpen} />
       </div>
     </SidebarProvider>
   )
