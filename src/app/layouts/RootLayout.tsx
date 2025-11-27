@@ -138,6 +138,7 @@ export default function RootLayout() {
                     size="icon"
                     className="h-8 w-8 shrink-0"
                     onClick={() => setIsProfileOpen(true)}
+                    aria-label="Paramètres profil"
                   >
                     <Settings className="h-4 w-4" />
                   </Button>

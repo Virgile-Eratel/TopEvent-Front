@@ -27,7 +27,14 @@ export default defineConfig({
             provider: 'v8',
             reporter: ['text', 'json', 'html', 'lcov'],
             include: ['src/**/*.{ts,tsx}'],
-            exclude: ['src/test/**', 'src/**/*.test.{ts,tsx}', 'src/vite-env.d.ts']
+            exclude: [
+                'src/test/**', 
+                'src/**/*.test.{ts,tsx}', 
+                'src/vite-env.d.ts',
+                'src/shared/components/ui/**',
+                'src/main.tsx', // Exclude main entry point
+                'src/app/router.tsx' // Exclude router definition which is config
+            ]
         },
     }
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
