@@ -69,6 +69,6 @@ jobs:
             ${{ env.IMAGE_NAME }}:latest
             ${{ env.IMAGE_NAME }}:${{ github.sha }}
           build-args: |
-            VITE_API_URL=https://51.254.205.63:5005
+            VITE_API_URL=http://51.254.205.63:5005
           cache-from: type=registry,ref=${{ env.IMAGE_NAME }}:buildcache
           cache-to: type=registry,ref=${{ env.IMAGE_NAME }}:buildcache,mode=max
