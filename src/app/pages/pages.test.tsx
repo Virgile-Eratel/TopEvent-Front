@@ -31,8 +31,7 @@ vi.mock('@/app/features/event/api/queries', () => ({
 
 vi.mock('@/app/features/subscriptions/api/queries', () => ({
     useUserSubscriptions: () => mockUseUserSubscriptions(),
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    useUserSubscription: (id: unknown) => mockUseUserSubscription(),
+    useUserSubscription: () => mockUseUserSubscription(),
     useCreateSubscriptionMutation: () => ({ mutateAsync: vi.fn(), isPending: false }),
     useCancelSubscriptionMutation: () => ({ mutateAsync: vi.fn(), isPending: false }),
 }))
