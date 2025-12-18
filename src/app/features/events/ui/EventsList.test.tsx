@@ -25,6 +25,16 @@ vi.mock('@/app/features/event/api/schema', () => ({
     }
 }))
 
+vi.mock('lucide-react', async () => {
+    const actual = await vi.importActual('lucide-react')
+    return {
+        ...actual,
+        ChevronLeft: () => <span data-testid="chevron-left">←</span>,
+        ChevronRight: () => <span data-testid="chevron-right">→</span>,
+        MoreHorizontal: () => <span>...</span>
+    }
+})
+
 describe('EventsList', () => {
     beforeEach(() => {
         vi.clearAllMocks()
@@ -147,6 +157,135 @@ describe('EventsList', () => {
         await user.click(resetBtn)
 
         expect(searchInput).toHaveValue('')
+    })
+
+    it('calls API with pagination parameters', () => {
+        mockUseEventsList.mockReturnValue({
+            data: [],
+            isLoading: false,
+            isError: false
+        })
+
+        renderWithProviders(<EventsList />)
+
+        expect(mockUseEventsList).toHaveBeenCalledWith(expect.objectContaining({
+            page: 1,
+            limit: 10
+        }))
+    })
+
+    it('shows pagination when there are results equal to page limit', () => {
+        // Generate exactly 10 events to trigger pagination display
+        const mockEvents = Array.from({ length: 10 }, (_, i) => ({
+            id: i + 1,
+            name: `Event ${i + 1}`,
+            startDate: new Date('2025-01-01'),
+            endDate: new Date('2025-01-02'),
+            location: 'Paris',
+            type: 'concert',
+            isPublic: true,
+            totalPlaces: 100,
+            currentSubscribers: 10,
+            createdBy: { firstName: 'John', lastName: 'Doe' }
+        }))
+
+        mockUseEventsList.mockReturnValue({
+            data: mockEvents,
+            isLoading: false,
+            isError: false
+        })
+
+        renderWithProviders(<EventsList />)
+
+        expect(screen.getByRole('navigation', { name: 'pagination' })).toBeInTheDocument()
+        expect(screen.getByText('Suivant')).toBeInTheDocument()
+        expect(screen.getByText('Précédent')).toBeInTheDocument()
+    })
+
+    it('does not show pagination when there are fewer results than page limit', () => {
+        const mockEvents = [
+            {
+                id: 1,
+                name: 'Single Event',
+                startDate: new Date('2025-01-01'),
+                endDate: new Date('2025-01-02'),
+                location: 'Paris',
+                type: 'concert',
+                isPublic: true,
+                totalPlaces: 100,
+                currentSubscribers: 10,
+                createdBy: { firstName: 'John', lastName: 'Doe' }
+            }
+        ]
+
+        mockUseEventsList.mockReturnValue({
+            data: mockEvents,
+            isLoading: false,
+            isError: false
+        })
+
+        renderWithProviders(<EventsList />)
+
+        expect(screen.queryByRole('navigation', { name: 'pagination' })).not.toBeInTheDocument()
+    })
+
+    it('navigates to next page when clicking next button', async () => {
+        const user = userEvent.setup()
+        const mockEvents = Array.from({ length: 10 }, (_, i) => ({
+            id: i + 1,
+            name: `Event ${i + 1}`,
+            startDate: new Date('2025-01-01'),
+            endDate: new Date('2025-01-02'),
+            location: 'Paris',
+            type: 'concert',
+            isPublic: true,
+            totalPlaces: 100,
+            currentSubscribers: 10,
+            createdBy: { firstName: 'John', lastName: 'Doe' }
+        }))
+
+        mockUseEventsList.mockReturnValue({
+            data: mockEvents,
+            isLoading: false,
+            isError: false
+        })
+
+        renderWithProviders(<EventsList />)
+
+        const nextButton = screen.getByText('Suivant')
+        await user.click(nextButton)
+
+        await waitFor(() => {
+            expect(mockUseEventsList).toHaveBeenCalledWith(expect.objectContaining({
+                page: 2,
+                limit: 10
+            }))
+        })
+    })
+
+    it('displays current page in results text', () => {
+        const mockEvents = Array.from({ length: 10 }, (_, i) => ({
+            id: i + 1,
+            name: `Event ${i + 1}`,
+            startDate: new Date('2025-01-01'),
+            endDate: new Date('2025-01-02'),
+            location: 'Paris',
+            type: 'concert',
+            isPublic: true,
+            totalPlaces: 100,
+            currentSubscribers: 10,
+            createdBy: { firstName: 'John', lastName: 'Doe' }
+        }))
+
+        mockUseEventsList.mockReturnValue({
+            data: mockEvents,
+            isLoading: false,
+            isError: false
+        })
+
+        renderWithProviders(<EventsList />)
+
+        expect(screen.getByText(/résultats : 10 \(page 1\)/i)).toBeInTheDocument()
     })
 })
 
