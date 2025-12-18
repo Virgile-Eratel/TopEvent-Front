@@ -1,4 +1,5 @@
 import { screen, fireEvent } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { vi, describe, it, expect, beforeEach } from 'vitest'
 import EventListAdmin from './EventListAdmin'
 import { renderWithProviders } from '@/test/test-utils'
@@ -42,6 +43,16 @@ vi.mock('../../users/api/schema.ts', () => ({
 vi.mock('../../subscriptions/api/schema.ts', () => ({
     SubscriptionSchema: {}
 }))
+
+vi.mock('lucide-react', async () => {
+    const actual = await vi.importActual('lucide-react')
+    return {
+        ...actual,
+        ChevronLeft: () => <span data-testid="chevron-left">←</span>,
+        ChevronRight: () => <span data-testid="chevron-right">→</span>,
+        MoreHorizontal: () => <span>...</span>
+    }
+})
 
 describe('EventListAdmin', () => {
     beforeEach(() => {
@@ -168,5 +179,143 @@ describe('EventListAdmin', () => {
         fireEvent.click(deleteBtn)
         
         expect(screen.getByTestId('delete-dialog')).toBeInTheDocument()
+    })
+
+    it('shows pagination when there are more than 10 events', () => {
+        const mockEvents = Array.from({ length: 15 }, (_, i) => ({
+            id: i + 1,
+            name: `Event ${i + 1}`,
+            startDate: new Date('2025-01-01'),
+            endDate: new Date('2025-01-02'),
+            location: 'Paris',
+            type: 'concert',
+            isPublic: true,
+            totalPlaces: 100,
+            currentSubscribers: 5
+        }))
+        mockUseAdminEventsList.mockReturnValue({ data: mockEvents, isLoading: false })
+        
+        renderWithProviders(<EventListAdmin />)
+        
+        expect(screen.getByRole('navigation', { name: 'pagination' })).toBeInTheDocument()
+        expect(screen.getByText('Suivant')).toBeInTheDocument()
+        expect(screen.getByText('Précédent')).toBeInTheDocument()
+    })
+
+    it('does not show pagination when there are 10 or fewer events', () => {
+        const mockEvents = Array.from({ length: 5 }, (_, i) => ({
+            id: i + 1,
+            name: `Event ${i + 1}`,
+            startDate: new Date('2025-01-01'),
+            endDate: new Date('2025-01-02'),
+            location: 'Paris',
+            type: 'concert',
+            isPublic: true,
+            totalPlaces: 100,
+            currentSubscribers: 5
+        }))
+        mockUseAdminEventsList.mockReturnValue({ data: mockEvents, isLoading: false })
+        
+        renderWithProviders(<EventListAdmin />)
+        
+        expect(screen.queryByRole('navigation', { name: 'pagination' })).not.toBeInTheDocument()
+    })
+
+    it('paginates events correctly', async () => {
+        const user = userEvent.setup()
+        const mockEvents = Array.from({ length: 15 }, (_, i) => ({
+            id: i + 1,
+            name: `Event ${i + 1}`,
+            startDate: new Date('2025-01-01'),
+            endDate: new Date('2025-01-02'),
+            location: 'Paris',
+            type: 'concert',
+            isPublic: true,
+            totalPlaces: 100,
+            currentSubscribers: 5
+        }))
+        mockUseAdminEventsList.mockReturnValue({ data: mockEvents, isLoading: false })
+        
+        renderWithProviders(<EventListAdmin />)
+        
+        // First page should show events 1-10
+        expect(screen.getByText('Event 1')).toBeInTheDocument()
+        expect(screen.getByText('Event 10')).toBeInTheDocument()
+        expect(screen.queryByText('Event 11')).not.toBeInTheDocument()
+        
+        // Click next page
+        const nextButton = screen.getByText('Suivant')
+        await user.click(nextButton)
+        
+        // Second page should show events 11-15
+        expect(screen.queryByText('Event 1')).not.toBeInTheDocument()
+        expect(screen.getByText('Event 11')).toBeInTheDocument()
+        expect(screen.getByText('Event 15')).toBeInTheDocument()
+    })
+
+    it('displays page info in results text', () => {
+        const mockEvents = Array.from({ length: 15 }, (_, i) => ({
+            id: i + 1,
+            name: `Event ${i + 1}`,
+            startDate: new Date('2025-01-01'),
+            endDate: new Date('2025-01-02'),
+            location: 'Paris',
+            type: 'concert',
+            isPublic: true,
+            totalPlaces: 100,
+            currentSubscribers: 5
+        }))
+        mockUseAdminEventsList.mockReturnValue({ data: mockEvents, isLoading: false })
+        
+        renderWithProviders(<EventListAdmin />)
+        
+        expect(screen.getByText(/résultats : 15.*page 1\/2/i)).toBeInTheDocument()
+    })
+
+    it('disables previous button on first page', () => {
+        const mockEvents = Array.from({ length: 15 }, (_, i) => ({
+            id: i + 1,
+            name: `Event ${i + 1}`,
+            startDate: new Date('2025-01-01'),
+            endDate: new Date('2025-01-02'),
+            location: 'Paris',
+            type: 'concert',
+            isPublic: true,
+            totalPlaces: 100,
+            currentSubscribers: 5
+        }))
+        mockUseAdminEventsList.mockReturnValue({ data: mockEvents, isLoading: false })
+        
+        renderWithProviders(<EventListAdmin />)
+        
+        const prevButton = screen.getByText('Précédent').closest('button')
+        expect(prevButton).toHaveClass('pointer-events-none')
+        expect(prevButton).toHaveClass('opacity-50')
+    })
+
+    it('disables next button on last page', async () => {
+        const user = userEvent.setup()
+        const mockEvents = Array.from({ length: 15 }, (_, i) => ({
+            id: i + 1,
+            name: `Event ${i + 1}`,
+            startDate: new Date('2025-01-01'),
+            endDate: new Date('2025-01-02'),
+            location: 'Paris',
+            type: 'concert',
+            isPublic: true,
+            totalPlaces: 100,
+            currentSubscribers: 5
+        }))
+        mockUseAdminEventsList.mockReturnValue({ data: mockEvents, isLoading: false })
+        
+        renderWithProviders(<EventListAdmin />)
+        
+        // Go to last page
+        const nextButton = screen.getByText('Suivant')
+        await user.click(nextButton)
+        
+        // Next button should be disabled on last page
+        expect(nextButton.closest('button')).toHaveClass('pointer-events-none')
+        expect(nextButton.closest('button')).toHaveClass('opacity-50')
     })
 })

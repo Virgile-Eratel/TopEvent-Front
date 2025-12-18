@@ -40,11 +40,22 @@ import {
     TableHeader,
     TableRow,
 } from "@/shared/components/ui/table";
+import {
+    Pagination,
+    PaginationContent,
+    PaginationItem,
+    PaginationLink,
+    PaginationNext,
+    PaginationPageSize,
+    PaginationPrevious,
+} from "@/shared/components/ui/pagination";
 import { cn } from "@/shared/lib/utils";
 
 import { DeleteEventDialog } from "./DeleteEventDialog";
 
 dayjs.locale("fr");
+
+const DEFAULT_PAGE_SIZE = 10;
 
 const selectClasses =
     "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50";
@@ -61,12 +72,28 @@ export default function EventListAdmin() {
     const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [eventToDelete, setEventToDelete] = useState<Event | null>(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
 
     const sortedEvents = useMemo(() => {
         return [...(data ?? [])].sort(
             (a, b) => a.startDate.getTime() - b.startDate.getTime(),
         );
     }, [data]);
+
+    // Pagination calculations
+    const totalPages = Math.ceil(sortedEvents.length / pageSize);
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    const paginatedEvents = sortedEvents.slice(startIndex, endIndex);
+
+    const goToPage = (page: number) => {
+        setCurrentPage(Math.max(1, Math.min(page, totalPages)));
+    };
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [pageSize]);
 
     const openEditSheet = (event: Event) => {
         setSelectedEvent(event);
@@ -126,7 +153,7 @@ export default function EventListAdmin() {
             </div>
 
             <div className="mb-3 text-sm text-muted-foreground">
-                Résultats : {sortedEvents.length}
+                Résultats : {sortedEvents.length} {totalPages > 1 && `(Page ${currentPage}/${totalPages})`}
             </div>
 
             <Table>
@@ -144,7 +171,7 @@ export default function EventListAdmin() {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {sortedEvents.length === 0 ? (
+                    {paginatedEvents.length === 0 ? (
                         <TableRow>
                             <TableCell
                                 colSpan={9}
@@ -154,7 +181,7 @@ export default function EventListAdmin() {
                             </TableCell>
                         </TableRow>
                     ) : (
-                        sortedEvents.map((event) => (
+                        paginatedEvents.map((event) => (
                             <TableRow
                                 key={String(event.id)}
                                 role="link"
@@ -211,6 +238,63 @@ export default function EventListAdmin() {
                     )}
                 </TableBody>
             </Table>
+
+            {totalPages > 1 && (
+                <div className="mt-4">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <PaginationPageSize
+                            value={pageSize}
+                            onValueChange={(next) => {
+                                setPageSize(next);
+                                setCurrentPage(1);
+                            }}
+                        />
+                        <Pagination>
+                            <PaginationContent>
+                                <PaginationItem>
+                                    <PaginationPrevious
+                                        onClick={() => goToPage(currentPage - 1)}
+                                        aria-disabled={currentPage === 1}
+                                        className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                                    />
+                                </PaginationItem>
+                                
+                                {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                                    let pageNum: number;
+                                    if (totalPages <= 5) {
+                                        pageNum = i + 1;
+                                    } else if (currentPage <= 3) {
+                                        pageNum = i + 1;
+                                    } else if (currentPage >= totalPages - 2) {
+                                        pageNum = totalPages - 4 + i;
+                                    } else {
+                                        pageNum = currentPage - 2 + i;
+                                    }
+                                    return (
+                                        <PaginationItem key={pageNum}>
+                                            <PaginationLink
+                                                onClick={() => goToPage(pageNum)}
+                                                isActive={currentPage === pageNum}
+                                                className="cursor-pointer"
+                                            >
+                                                {pageNum}
+                                            </PaginationLink>
+                                        </PaginationItem>
+                                    );
+                                })}
+
+                                <PaginationItem>
+                                    <PaginationNext
+                                        onClick={() => goToPage(currentPage + 1)}
+                                        aria-disabled={currentPage === totalPages}
+                                        className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                                    />
+                                </PaginationItem>
+                            </PaginationContent>
+                        </Pagination>
+                    </div>
+                </div>
+            )}
 
             <Sheet open={isSheetOpen} onOpenChange={handleSheetToggle}>
                 <SheetContent className="w-full gap-0 p-0 sm:max-w-xl">
