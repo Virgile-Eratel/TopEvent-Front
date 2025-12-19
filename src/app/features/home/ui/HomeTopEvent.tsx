@@ -13,7 +13,7 @@ export function HomeTopEvent() {
 
 
     return (
-        <div className="flex justify-center h-full w-full p-6 poppins-regular">
+        <div className="flex justify-center h-full w-full p-6">
             <div className="space-y-15">
                 <h1 className="text-3xl text-center">⭐ Événements recommandés pour vous</h1>
                 

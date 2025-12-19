@@ -76,7 +76,7 @@ export default function HomeSubscription() {
     );
 
     return (
-        <div className="flex justify-center h-full w-full p-6 poppins-regular">
+        <div className="flex justify-center h-full w-full p-6">
             <div className="space-y-15">
                 <h1 className="mt-5 text-3xl text-center">📅 Vos prochains événements à venir</h1>
 
