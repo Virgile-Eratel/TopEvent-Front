@@ -15,9 +15,9 @@ vi.mock('../api/queries', () => ({
         enum: {
             concert: 'concert',
             conference: 'conference',
-            workshop: 'workshop',
+            webinaire: 'webinaire',
         },
-        options: ['concert', 'conference', 'workshop']
+        options: ['concert', 'conference', 'webinaire']
     },
     EventCreateSchema: {
         parse: (v: unknown) => v // Mock simple pass-through or use real schema if possible

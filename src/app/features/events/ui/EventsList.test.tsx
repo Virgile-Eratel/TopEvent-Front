@@ -21,7 +21,7 @@ vi.mock('@/app/features/events/api/queries', () => ({
 
 vi.mock('@/app/features/event/api/schema', () => ({
     EventTypeEnum: {
-        options: ['concert', 'conference', 'workshop']
+        options: ['concert', 'conference', 'webinaire']
     }
 }))
 
