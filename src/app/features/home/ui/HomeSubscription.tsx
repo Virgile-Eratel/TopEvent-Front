@@ -32,8 +32,8 @@ const SubscriptionRow = ({ subscription }: { subscription: Subscription}) => {
     return (
         <>
             {event ?
-                <Label className="space-y-6 text-lg yeseva-one-regular">
-                    Plus que <b>{dayRaining} jours</b> avant votre évènement {event.name} à <u>{event.location}</u>.
+                <Label className="space-y-6 text-lg">
+                    Plus que <b>{dayRaining} jours</b> avant votre évènement {event.name} à <i>{event.location}</i>.
                 </Label>
 
                 :
@@ -76,19 +76,31 @@ export default function HomeSubscription() {
     );
 
     return (
-        <div className="flex justify-center h-full w-full p-6">
+        <div className="flex justify-center h-full w-full p-6 poppins-regular">
             <div className="space-y-15">
-                <h1 className="yeseva-one-regular mt-5 text-3xl text-center">📅 Vos prochains événements à venir</h1>
+                <h1 className="mt-5 text-3xl text-center">📅 Vos prochains événements à venir</h1>
 
                 <div className="space-y-6">
-                    {sortedSubscriptions.map((sub: Subscription) => (
-                        <div>
-                            <span className="text-sm">✦ </span>
-                            <SubscriptionRow subscription={sub}/>
-                        </div>
-                    ))}
+                    {sortedSubscriptions.length > 0 ? (
+                        <>
+                            {sortedSubscriptions.map((sub: Subscription) => (
+                                <div key={sub.id}>
+                                    <span className="text-sm">✦ </span>
+                                    <SubscriptionRow subscription={sub}/>
+                                </div>
+                            ))}
 
-                    <Separator className="mt-20 h-px w-1/3 mx-auto bg-black/30 rounded-full" />
+                            <Separator className="mt-20 h-px w-1/3 mx-auto bg-black/30 rounded-full" />
+                        </>
+                    ) : (
+                        <>
+                            <Label className="text-lg">
+                                Vous n'avez pas d'évènements à venir. Inscrivez-vous dès maintenant !
+                            </Label>
+
+                            <Separator className="mt-20 h-px w-1/3 mx-auto bg-black/30 rounded-full" />
+                        </>
+                    )}
                 </div>
             </div>
         </div>

@@ -7,7 +7,7 @@ export default function HomePage() {
 
 
     return (
-        <div className="flex flex-col item-center justify-center h-full w-full bg-gradient-to-br from-indigo-100 via-pink-100 to-red-200">
+        <div className="flex flex-col item-center justify-center h-full w-full">
             {isAuthenticated && (
                 <HomeSubscription />
             )}

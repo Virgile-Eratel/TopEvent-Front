@@ -13,16 +13,16 @@ export function HomeTopEvent() {
 
 
     return (
-        <div className="flex justify-center h-full w-full p-6">
+        <div className="flex justify-center h-full w-full p-6 poppins-regular">
             <div className="space-y-15">
-                <h1 className="yeseva-one-regular text-3xl text-center">⭐ Événements recommandés pour vous</h1>
+                <h1 className="text-3xl text-center">⭐ Événements recommandés pour vous</h1>
                 
                 <div className="space-y-6">
                     {data.map((event) => (
                         <div key={event.id} className="flex item-center gap-20">
                             <div className="flex items-baseline gap-1">
                                 <span className="text-sm text-center">✦ </span>
-                                <Label className="text-lg yeseva-one-regular">
+                                <Label className="text-lg">
                                     <i>{event.location}</i>
                                     {", l'évènement "}
                                     {event.name}{", se déroulera le "}
